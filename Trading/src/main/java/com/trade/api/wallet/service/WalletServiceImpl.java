@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class WalletServiceImpl implements WalletService {
+
     private final WalletRepository walletRepository;
 
     @Autowired
@@ -30,4 +31,3 @@ public class WalletServiceImpl implements WalletService {
         walletRepository.save(wallet);
     }
 }
-

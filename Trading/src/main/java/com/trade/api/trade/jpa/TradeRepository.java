@@ -9,21 +9,17 @@ import java.util.Optional;
 
 @Repository
 public interface TradeRepository {
-    Long save(Trade trade);
 
-    List<Trade> findAll();
+    void save(Trade trade);
 
     Optional<Trade> findByTradeId(Long tradeId) throws TradeNotFoundException;
 
-    List<Trade> findTradesByTraderId(String traderId);
 
     List<Trade> findByShareNameContaining(String shareName);
 
-    void deleteTrade(Trade trade);
 
-    boolean existsById(Long tradeId);
 
     List<Trade> findTradesByTraderIdAndShareNameContaining(String traderId, String shareName);
 
-    List<Trade> findAllByTraderId(String traderId);
+    boolean existsById(Long tradeId);
 }

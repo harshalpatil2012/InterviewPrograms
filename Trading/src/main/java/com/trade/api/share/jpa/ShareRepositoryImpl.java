@@ -16,7 +16,9 @@ public class ShareRepositoryImpl implements ShareRepository {
 
     @Override
     public Optional<Share> findById(String shareName) {
-        TypedQuery<Share> query = entityManager.createQuery("SELECT s FROM Share s WHERE s.shareName = :shareName", Share.class);
+        TypedQuery<Share> query = entityManager.createQuery(
+                "SELECT s FROM Share s WHERE s.shareName = :shareName", Share.class
+        );
         query.setParameter("shareName", shareName);
         return Optional.ofNullable(query.getSingleResult());
     }

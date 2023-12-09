@@ -1,7 +1,6 @@
 package com.trade.api.wallet.service.exception;
 
 public class WalletNotFoundException extends RuntimeException {
-
     private final String traderId;
 
     public WalletNotFoundException(String traderId) {

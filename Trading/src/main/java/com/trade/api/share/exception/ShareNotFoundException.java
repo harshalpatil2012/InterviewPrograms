@@ -1,5 +1,6 @@
 package com.trade.api.share.exception;
 
+
 public class ShareNotFoundException extends RuntimeException {
 
     private final String shareName;

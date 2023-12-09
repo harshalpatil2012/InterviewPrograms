@@ -19,18 +19,22 @@ public class ShareServiceImpl implements ShareService {
 
     @Override
     public int getAvailableQuantity(String shareName) {
-        Share share = shareRepository.findById(shareName).orElseThrow(() -> new ShareNotFoundException(shareName));
+        Share share = shareRepository.findById(shareName)
+                .orElseThrow(() -> new ShareNotFoundException(shareName));
         return share.getAvailableQuantity();
     }
 
     @Override
     public void updateQuantity(String shareName, int quantity, BuyOrSell buyOrSell) {
-        Share share = shareRepository.findById(shareName).orElseThrow(() -> new ShareNotFoundException(shareName));
+        Share share = shareRepository.findById(shareName)
+                .orElseThrow(() -> new ShareNotFoundException(shareName));
+
         if (buyOrSell == BuyOrSell.BUY) {
             share.setAvailableQuantity(share.getAvailableQuantity() - quantity);
         } else {
             share.setAvailableQuantity(share.getAvailableQuantity() + quantity);
         }
+
         shareRepository.save(share);
     }
 }

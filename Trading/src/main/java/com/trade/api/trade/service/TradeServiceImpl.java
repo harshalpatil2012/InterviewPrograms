@@ -21,6 +21,7 @@ import java.util.List;
 
 @Service
 public class TradeServiceImpl implements TradeService {
+
     private final TradeRepository tradeRepository;
     private final WalletService walletService;
     private final ShareService shareService;
@@ -48,16 +49,14 @@ public class TradeServiceImpl implements TradeService {
     @Override
     public void updateTrade(TradeUpdate update) {
         validateUpdate(update);
-        Trade trade = tradeRepository.findByTradeId(update.getTradeId())
-                .orElseThrow(() -> new TradeNotFoundException(update.getTradeId()));
+        Trade trade = getTradeById(update.getTradeId());
         applyUpdateToTrade(trade, update);
         tradeRepository.save(trade);
     }
 
     @Override
     public void cancelTrade(Long tradeId) {
-        Trade trade = tradeRepository.findByTradeId(tradeId)
-                .orElseThrow(() -> new TradeNotFoundException(tradeId));
+        Trade trade = getTradeById(tradeId);
         cancelTrade(trade);
         tradeRepository.save(trade);
     }
@@ -70,16 +69,26 @@ public class TradeServiceImpl implements TradeService {
 
     private TradeReport generateTradeReport(List<Trade> trades) {
         // Implement the logic to generate a meaningful trade report
-        // ...
+        // ... your logic here ...
         return new TradeReport();
     }
 
+    private Trade getTradeById(Long tradeId) {
+        return tradeRepository.findByTradeId(tradeId)
+                .orElseThrow(() -> new TradeNotFoundException(String.valueOf(tradeId)));
+    }
+
     private void validateTrade(TradeRequest request) {
+        if (request.getTradeId() != null && tradeRepository.existsById(Long.valueOf(request.getTradeId()))) {
+            throw new TradeNotFoundException(request.getTradeId());
+        }
+
         if (shareService.getAvailableQuantity(request.getShareName()) < request.getQuantity()) {
             throw new InsufficientQuantityException(request.getShareName(), request.getQuantity());
         }
-        if (request.getBuyOrSell() == BuyOrSell.BUY &&
-                walletService.getBalance(request.getTraderId()) < calculateAmount(request)) {
+
+        double requiredAmount = calculateAmount(request);
+        if (request.getBuyOrSell() == BuyOrSell.BUY && walletService.getBalance(request.getTraderId()) < requiredAmount) {
             throw new InsufficientBalanceException(request.getTraderId());
         }
     }
@@ -87,15 +96,17 @@ public class TradeServiceImpl implements TradeService {
     private void bookNewTrade(TradeRequest tradeRequest) {
         Trade trade = tradeRequest.toTrade(tradeRequest);
         tradeRepository.save(trade);
+
         updateWalletAndShare(tradeRequest);
         sendTradeUpdateToExchange(tradeRequest);
+
         trade.setStatus(TradeStatus.BOOKED);
         tradeRepository.save(trade);
     }
 
     private void validateUpdate(TradeUpdate update) {
         // Implement update validation logic
-        // ...
+        // ... your logic here ...
     }
 
     private void applyUpdateToTrade(Trade trade, TradeUpdate update) {

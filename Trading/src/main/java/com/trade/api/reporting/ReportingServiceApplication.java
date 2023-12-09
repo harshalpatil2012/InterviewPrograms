@@ -1,5 +1,6 @@
 package com.trade.api.reporting;
 
+
 import com.trade.api.entity.Trade;
 import com.trade.api.trade.jpa.TradeRepository;
 import org.springframework.beans.factory.annotation.Autowired;

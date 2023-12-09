@@ -2,14 +2,14 @@ package com.trade.api.trade.exception;
 
 public class TradeNotFoundException extends RuntimeException {
 
-    private final Long tradeId;
+    private final String tradeId;
 
-    public TradeNotFoundException(Long tradeId) {
+    public TradeNotFoundException(String tradeId) {
         super("Trade with ID " + tradeId + " not found");
         this.tradeId = tradeId;
     }
 
-    public Long getTradeId() {
+    public String getTradeId() {
         return tradeId;
     }
 }

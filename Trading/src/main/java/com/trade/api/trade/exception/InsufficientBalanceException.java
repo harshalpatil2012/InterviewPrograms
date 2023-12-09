@@ -1,5 +1,6 @@
 package com.trade.api.trade.exception;
 
+
 public class InsufficientBalanceException extends RuntimeException {
 
     private final String traderId;
@@ -13,3 +14,4 @@ public class InsufficientBalanceException extends RuntimeException {
         return traderId;
     }
 }
+
