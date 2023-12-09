@@ -1,0 +1,27 @@
+plugins {
+    id 'java'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.projectlombok:lombok:1.18.22'
+    annotationProcessor 'org.projectlombok:lombok:1.18.22'
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(11)
+    }
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+    options.compilerArgs.add('--add-opens', 'java.base/java.lang=ALL-UNNAMED')
+    options.compilerArgs.add('--add-opens', 'java.base/java.util=ALL-UNNAMED')
+    options.compilerArgs.add('--add-opens', 'java.base/java.text=ALL-UNNAMED')
+    options.compilerArgs.add('-parameters')
+}
+
