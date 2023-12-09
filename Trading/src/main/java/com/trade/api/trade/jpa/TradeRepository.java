@@ -9,7 +9,6 @@ import java.util.Optional;
 
 @Repository
 public interface TradeRepository {
-
     Long save(Trade trade);
 
     List<Trade> findAll();

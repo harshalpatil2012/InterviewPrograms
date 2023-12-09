@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class WalletServiceImpl implements WalletService {
-
     private final WalletRepository walletRepository;
 
     @Autowired
@@ -18,14 +17,17 @@ public class WalletServiceImpl implements WalletService {
 
     @Override
     public double getBalance(String traderId) {
-        Wallet wallet = walletRepository.findById(traderId).orElseThrow(() -> new WalletNotFoundException(traderId));
+        Wallet wallet = walletRepository.findById(traderId)
+                .orElseThrow(() -> new WalletNotFoundException(traderId));
         return wallet.getBalance();
     }
 
     @Override
     public void updateBalance(String traderId, double amount) {
-        Wallet wallet = walletRepository.findById(traderId).orElseThrow(() -> new WalletNotFoundException(traderId));
+        Wallet wallet = walletRepository.findById(traderId)
+                .orElseThrow(() -> new WalletNotFoundException(traderId));
         wallet.setBalance(wallet.getBalance() + amount);
         walletRepository.save(wallet);
     }
 }
+

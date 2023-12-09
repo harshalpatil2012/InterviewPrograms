@@ -18,6 +18,5 @@ public class Trade {
     private String traderId;
     private TradeStatus status;
     private BuyOrSell buyOrSell;
-
 }
 

@@ -3,7 +3,6 @@ package com.trade.api.trade.service;
 import com.trade.api.dto.TradeReport;
 import com.trade.api.dto.TradeRequest;
 import com.trade.api.dto.TradeUpdate;
-import com.trade.api.entity.Trade;
 
 public interface TradeService {
 
@@ -15,5 +14,4 @@ public interface TradeService {
 
     TradeReport getTradeReport(String traderId, String keyword);
 
-    Trade getTradeById(Long tradeId);
 }

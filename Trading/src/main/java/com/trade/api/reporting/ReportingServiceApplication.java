@@ -16,8 +16,12 @@ import java.util.Optional;
 @EnableElasticsearchRepositories
 public class ReportingServiceApplication {
 
+    private final TradeRepository tradeRepository;
+
     @Autowired
-    private TradeRepository tradeRepository;
+    public ReportingServiceApplication(TradeRepository tradeRepository) {
+        this.tradeRepository = tradeRepository;
+    }
 
     @GetMapping("/trades/{tradeId}")
     public Optional<Trade> getTrade(@PathVariable Long tradeId) {

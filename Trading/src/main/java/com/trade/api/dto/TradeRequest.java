@@ -15,7 +15,7 @@ public class TradeRequest {
 
     public void setStatus(TradeStatus tradeStatus) {
     }
-    public Trade convertTradeRequestToDto(TradeRequest request) {
+    public Trade toTrade(TradeRequest request) {
         Trade dto = new Trade();
         dto.setShareName(request.getShareName());
         dto.setQuantity(request.getQuantity());

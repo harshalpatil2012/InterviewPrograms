@@ -21,14 +21,18 @@ import java.util.List;
 
 @Service
 public class TradeServiceImpl implements TradeService {
-
     private final TradeRepository tradeRepository;
     private final WalletService walletService;
     private final ShareService shareService;
     private final TradeExchangeClient tradeExchangeClient;
 
     @Autowired
-    public TradeServiceImpl(TradeRepository tradeRepository, WalletService walletService, ShareService shareService, TradeExchangeClient tradeExchangeClient) {
+    public TradeServiceImpl(
+            TradeRepository tradeRepository,
+            WalletService walletService,
+            ShareService shareService,
+            TradeExchangeClient tradeExchangeClient
+    ) {
         this.tradeRepository = tradeRepository;
         this.walletService = walletService;
         this.shareService = shareService;
@@ -37,89 +41,64 @@ public class TradeServiceImpl implements TradeService {
 
     @Override
     public void submitTrade(TradeRequest request) {
-        // 1. Validation of trade
         validateTrade(request);
-        // Book new trade
         bookNewTrade(request);
     }
 
     @Override
     public void updateTrade(TradeUpdate update) {
-        // Validate update request
         validateUpdate(update);
-
-        // Load existing trade
-        Trade trade = tradeRepository.findByTradeId(update.getTradeId()).orElseThrow(() -> new TradeNotFoundException(update.getTradeId()));
-
-        // Apply update and update trade
+        Trade trade = tradeRepository.findByTradeId(update.getTradeId())
+                .orElseThrow(() -> new TradeNotFoundException(update.getTradeId()));
         applyUpdateToTrade(trade, update);
         tradeRepository.save(trade);
     }
 
     @Override
     public void cancelTrade(Long tradeId) {
-        // Load existing trade
-        Trade trade = tradeRepository.findByTradeId(tradeId).orElseThrow(() -> new TradeNotFoundException(tradeId));
-
-        // Cancel trade and update trade
+        Trade trade = tradeRepository.findByTradeId(tradeId)
+                .orElseThrow(() -> new TradeNotFoundException(tradeId));
         cancelTrade(trade);
         tradeRepository.save(trade);
     }
 
     @Override
     public TradeReport getTradeReport(String traderId, String keyword) {
-        // Find trades based on traderId and/or keyword
         List<Trade> trades = tradeRepository.findTradesByTraderIdAndShareNameContaining(traderId, keyword);
-
-        // Generate and return trade report
         return generateTradeReport(trades);
     }
 
     private TradeReport generateTradeReport(List<Trade> trades) {
+        // Implement the logic to generate a meaningful trade report
+        // ...
         return new TradeReport();
     }
 
-    @Override
-    public Trade getTradeById(Long tradeId) {
-        return tradeRepository.findByTradeId(tradeId).orElseThrow(() -> new TradeNotFoundException(tradeId));
-    }
-
     private void validateTrade(TradeRequest request) {
-        // Implement trade validation logic
-        // Check share availability, wallet balance, etc.
-        // Throw exception if validation fails
-
         if (shareService.getAvailableQuantity(request.getShareName()) < request.getQuantity()) {
             throw new InsufficientQuantityException(request.getShareName(), request.getQuantity());
         }
-        if (request.getBuyOrSell() == BuyOrSell.BUY && (double) walletService.getBalance(request.getTraderId()) < calculateAmount(request)) {
+        if (request.getBuyOrSell() == BuyOrSell.BUY &&
+                walletService.getBalance(request.getTraderId()) < calculateAmount(request)) {
             throw new InsufficientBalanceException(request.getTraderId());
         }
     }
 
     private void bookNewTrade(TradeRequest tradeRequest) {
-        // Save trade to the database
-        tradeRepository.save(tradeRequest.convertTradeRequestToDto(tradeRequest));
-
-        // Update wallet balance and share quantity
+        Trade trade = tradeRequest.toTrade(tradeRequest);
+        tradeRepository.save(trade);
         updateWalletAndShare(tradeRequest);
-
-        // Send trade update to Share Exchange
         sendTradeUpdateToExchange(tradeRequest);
-
-        // Update trade status to BOOKED
-        tradeRequest.setStatus(TradeStatus.BOOKED);
-        tradeRepository.save(tradeRequest.convertTradeRequestToDto(tradeRequest));
+        trade.setStatus(TradeStatus.BOOKED);
+        tradeRepository.save(trade);
     }
 
     private void validateUpdate(TradeUpdate update) {
         // Implement update validation logic
-        // Throw exception if validation fails
+        // ...
     }
 
     private void applyUpdateToTrade(Trade trade, TradeUpdate update) {
-        // Update trade attributes based on the update request
-        // Update quantity, price, buy/sell type, etc.
         trade.setQuantity(update.getQuantity());
         trade.setPrice(update.getPrice());
         trade.setBuyOrSell(update.getBuyOrSell());
@@ -127,16 +106,7 @@ public class TradeServiceImpl implements TradeService {
     }
 
     private void cancelTrade(Trade trade) {
-        // Update trade status to CANCELLED
         trade.setStatus(TradeStatus.CANCELLED);
-    }
-
-    private void reverseTrade(TradeRequest tradeRequest) {
-        tradeRequest.setBuyOrSell(tradeRequest.getBuyOrSell().reverse());
-        updateWalletAndShare(tradeRequest);
-
-        // Send trade update to Share Exchange
-        sendTradeUpdateToExchange(tradeRequest);
     }
 
     private void updateWalletAndShare(TradeRequest tradeRequest) {
@@ -149,10 +119,13 @@ public class TradeServiceImpl implements TradeService {
     }
 
     private void sendTradeUpdateToExchange(TradeRequest tradeRequest) {
-        // Implement logic for sending tradeRequest update to Share Exchange using tradeExchangeClient
-        // This could involve sending a message to an external queue or making a REST API call
-
-        TradeExchangeMessage message = new TradeExchangeMessage(tradeRequest.getShareName(), tradeRequest.getQuantity(), tradeRequest.getPrice(), tradeRequest.getBuyOrSell(), tradeRequest.getTraderId());
+        TradeExchangeMessage message = new TradeExchangeMessage(
+                tradeRequest.getShareName(),
+                tradeRequest.getQuantity(),
+                tradeRequest.getPrice(),
+                tradeRequest.getBuyOrSell(),
+                tradeRequest.getTraderId()
+        );
         tradeExchangeClient.sendTradeUpdate(message);
     }
 }
