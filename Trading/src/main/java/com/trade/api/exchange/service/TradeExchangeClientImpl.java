@@ -29,4 +29,11 @@ public class TradeExchangeClientImpl implements TradeExchangeClient {
         // ...
         return ""; // Replace with the actual JSON conversion logic
     }
+
+    @Override
+    public void updateShareQuantity(TradeExchangeMessage message) {
+        // Implement logic to send the trade update to the Share Exchange
+        // This could involve sending a message to an external queue or making a REST API call
+        // ...
+    }
 }

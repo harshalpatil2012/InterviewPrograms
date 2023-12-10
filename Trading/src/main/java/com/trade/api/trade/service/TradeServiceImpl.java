@@ -1,19 +1,10 @@
+// TradeServiceImpl.java
 package com.trade.api.trade.service;
 
-import com.trade.api.dto.BuyOrSell;
-import com.trade.api.dto.TradeReport;
 import com.trade.api.dto.TradeRequest;
-import com.trade.api.dto.TradeStatus;
-import com.trade.api.dto.TradeUpdate;
 import com.trade.api.entity.Trade;
-import com.trade.api.exchange.dto.TradeExchangeMessage;
-import com.trade.api.exchange.service.TradeExchangeClient;
-import com.trade.api.share.service.ShareService;
-import com.trade.api.trade.exception.InsufficientBalanceException;
-import com.trade.api.trade.exception.InsufficientQuantityException;
 import com.trade.api.trade.exception.TradeNotFoundException;
 import com.trade.api.trade.jpa.TradeRepository;
-import com.trade.api.wallet.service.WalletService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,121 +13,60 @@ import java.util.List;
 @Service
 public class TradeServiceImpl implements TradeService {
 
-    private final TradeRepository tradeRepository;
-    private final WalletService walletService;
-    private final ShareService shareService;
-    private final TradeExchangeClient tradeExchangeClient;
+    private final List<TradeCommand> tradeCommands;
+
+    TradeRepository tradeRepository;
+
+    TradeValidationService tradeValidationService;
+    TradeBookingService bookingService;
+    TradeCancellationService tradeCancellationService;
 
     @Autowired
-    public TradeServiceImpl(
-            TradeRepository tradeRepository,
-            WalletService walletService,
-            ShareService shareService,
-            TradeExchangeClient tradeExchangeClient
-    ) {
+    public TradeServiceImpl(List<TradeCommand> tradeCommands, TradeRepository tradeRepository,
+                            TradeValidationService tradeValidationService, TradeBookingService bookingService, TradeCancellationService tradeCancellationService) {
+        this.tradeCommands = tradeCommands;
         this.tradeRepository = tradeRepository;
-        this.walletService = walletService;
-        this.shareService = shareService;
-        this.tradeExchangeClient = tradeExchangeClient;
+        this.tradeValidationService = tradeValidationService;
+        this.bookingService = bookingService;
+        this.tradeCancellationService = tradeCancellationService;
     }
 
     @Override
     public void submitTrade(TradeRequest request) {
-        validateTrade(request);
-        bookNewTrade(request);
+        executeCommand(() -> validateAndBookTrade(request));
     }
 
     @Override
-    public void updateTrade(TradeUpdate update) {
-        validateUpdate(update);
-        Trade trade = getTradeById(update.getTradeId());
-        applyUpdateToTrade(trade, update);
-        tradeRepository.save(trade);
+    public void updateTrade(TradeRequest updateRequest) {
+        executeCommand(() -> validateAndUpdateTrade(updateRequest));
     }
 
     @Override
     public void cancelTrade(Long tradeId) {
-        Trade trade = getTradeById(tradeId);
-        cancelTrade(trade);
+        executeCommand(() -> validateAndCancelTrade(tradeId));
+    }
+
+
+    private void executeCommand(TradeCommand command) {
+        command.execute();
+    }
+
+
+    private void validateAndBookTrade(TradeRequest request) {
+        tradeValidationService.validateTrade(request);
+        bookingService.bookTrade(request);
+    }
+
+    private void validateAndUpdateTrade(TradeRequest updateRequest) {
+        tradeValidationService.validateTrade(updateRequest);
+        Trade trade = tradeRepository.findByTradeId(updateRequest.getTradeId())
+                .orElseThrow(() -> new TradeNotFoundException(updateRequest.getTradeId()));
         tradeRepository.save(trade);
     }
 
-    @Override
-    public TradeReport getTradeReport(String traderId, String keyword) {
-        List<Trade> trades = tradeRepository.findTradesByTraderIdAndShareNameContaining(traderId, keyword);
-        return generateTradeReport(trades);
-    }
-
-    private TradeReport generateTradeReport(List<Trade> trades) {
-        // Implement the logic to generate a meaningful trade report
-        // ... your logic here ...
-        return new TradeReport();
-    }
-
-    private Trade getTradeById(Long tradeId) {
-        return tradeRepository.findByTradeId(tradeId)
-                .orElseThrow(() -> new TradeNotFoundException(String.valueOf(tradeId)));
-    }
-
-    private void validateTrade(TradeRequest request) {
-        if (request.getTradeId() != null && tradeRepository.existsById(Long.valueOf(request.getTradeId()))) {
-            throw new TradeNotFoundException(request.getTradeId());
-        }
-
-        if (shareService.getAvailableQuantity(request.getShareName()) < request.getQuantity()) {
-            throw new InsufficientQuantityException(request.getShareName(), request.getQuantity());
-        }
-
-        double requiredAmount = calculateAmount(request);
-        if (request.getBuyOrSell() == BuyOrSell.BUY && walletService.getBalance(request.getTraderId()) < requiredAmount) {
-            throw new InsufficientBalanceException(request.getTraderId());
-        }
-    }
-
-    private void bookNewTrade(TradeRequest tradeRequest) {
-        Trade trade = tradeRequest.toTrade(tradeRequest);
-        tradeRepository.save(trade);
-
-        updateWalletAndShare(tradeRequest);
-        sendTradeUpdateToExchange(tradeRequest);
-
-        trade.setStatus(TradeStatus.BOOKED);
-        tradeRepository.save(trade);
-    }
-
-    private void validateUpdate(TradeUpdate update) {
-        // Implement update validation logic
-        // ... your logic here ...
-    }
-
-    private void applyUpdateToTrade(Trade trade, TradeUpdate update) {
-        trade.setQuantity(update.getQuantity());
-        trade.setPrice(update.getPrice());
-        trade.setBuyOrSell(update.getBuyOrSell());
-        trade.setStatus(update.getStatus());
-    }
-
-    private void cancelTrade(Trade trade) {
-        trade.setStatus(TradeStatus.CANCELLED);
-    }
-
-    private void updateWalletAndShare(TradeRequest tradeRequest) {
-        walletService.updateBalance(tradeRequest.getTraderId(), calculateAmount(tradeRequest));
-        shareService.updateQuantity(tradeRequest.getShareName(), tradeRequest.getQuantity(), tradeRequest.getBuyOrSell());
-    }
-
-    private double calculateAmount(TradeRequest tradeRequest) {
-        return tradeRequest.getQuantity() * tradeRequest.getPrice();
-    }
-
-    private void sendTradeUpdateToExchange(TradeRequest tradeRequest) {
-        TradeExchangeMessage message = new TradeExchangeMessage(
-                tradeRequest.getShareName(),
-                tradeRequest.getQuantity(),
-                tradeRequest.getPrice(),
-                tradeRequest.getBuyOrSell(),
-                tradeRequest.getTraderId()
-        );
-        tradeExchangeClient.sendTradeUpdate(message);
+    private void validateAndCancelTrade(Long tradeId) {
+        Trade trade = tradeRepository.findByTradeId(tradeId)
+                .orElseThrow(() -> new TradeNotFoundException(tradeId));
+        tradeCancellationService.cancelTrade(trade.getTradeId());
     }
 }

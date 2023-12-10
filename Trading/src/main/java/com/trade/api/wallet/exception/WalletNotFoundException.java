@@ -1,14 +1,14 @@
-package com.trade.api.wallet.service.exception;
+package com.trade.api.wallet.exception;
 
 public class WalletNotFoundException extends RuntimeException {
-    private final String traderId;
+    private final Long traderId;
 
-    public WalletNotFoundException(String traderId) {
+    public WalletNotFoundException(Long traderId) {
         super("Wallet for trader ID '" + traderId + "' not found");
         this.traderId = traderId;
     }
 
-    public String getTraderId() {
+    public Long getTraderId() {
         return traderId;
     }
 }

@@ -1,9 +1,9 @@
 package com.trade.api.share.service;
 
-import com.trade.api.dto.BuyOrSell;
+import com.trade.api.dto.TradeRequest;
 
 public interface ShareService {
     int getAvailableQuantity(String shareName);
 
-    void updateQuantity(String shareName, int quantity, BuyOrSell buyOrSell);
+    void updateQuantity(TradeRequest tradeRequest);
 }

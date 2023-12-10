@@ -1,7 +1,8 @@
 package com.trade.api.wallet.service;
 
 public interface WalletService {
-    double getBalance(String traderId);
+    double getBalance(Long traderId);
 
-    void updateBalance(String traderId, double amount);
+    void updateBalance(Long traderId, double amount);
+
 }

@@ -1,4 +1,4 @@
-package com.trade.api.wallet.service.jpa;
+package com.trade.api.wallet.jpa;
 
 import com.trade.api.entity.Wallet;
 import jakarta.persistence.EntityManager;
@@ -15,7 +15,7 @@ public class WalletRepositoryImpl implements WalletRepository {
     private EntityManager entityManager;
 
     @Override
-    public Optional<Wallet> findById(String traderId) {
+    public Optional<Wallet> findById(Long traderId) {
         TypedQuery<Wallet> query = entityManager.createQuery("SELECT w FROM Wallet w WHERE w.traderId = :traderId", Wallet.class);
         query.setParameter("traderId", traderId);
         return Optional.ofNullable(query.getSingleResult());

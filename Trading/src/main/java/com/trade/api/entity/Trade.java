@@ -15,7 +15,7 @@ public class Trade {
     private String shareName;
     private int quantity;
     private double price;
-    private String traderId;
+    private Long traderId;
     private TradeStatus status;
     private BuyOrSell buyOrSell;
 }

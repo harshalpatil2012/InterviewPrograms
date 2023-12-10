@@ -22,7 +22,7 @@ public class TradeRepositoryImpl implements TradeRepository {
     public Optional<Trade> findByTradeId(Long tradeId) {
         Trade trade = entityManager.find(Trade.class, tradeId);
         if (trade == null) {
-            throw new TradeNotFoundException(String.valueOf(tradeId));
+            throw new TradeNotFoundException(tradeId);
         }
         return Optional.of(trade);
     }

@@ -17,8 +17,6 @@ public interface TradeRepository {
 
     List<Trade> findByShareNameContaining(String shareName);
 
-
-
     List<Trade> findTradesByTraderIdAndShareNameContaining(String traderId, String shareName);
 
     boolean existsById(Long tradeId);

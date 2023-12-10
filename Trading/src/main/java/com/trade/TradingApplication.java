@@ -1,4 +1,4 @@
-package com.trade.main.app;
+package com.trade;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
