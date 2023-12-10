@@ -103,3 +103,31 @@
 
 - **Other Libraries:**
     - Depending on specific implementation choices, additional libraries for queueing, messaging, and communication might be used.
+
+## Database Schema:
+
+### Trade Table:
+
+| Field       | Type          | Description                                 |
+|-------------|---------------|---------------------------------------------|
+| trade_id    | INT (PK)      | Unique identifier for each trade.           |
+| share_name  | VARCHAR       | Name of the share being traded.             |
+| quantity    | INT           | Quantity of shares in the trade.            |
+| price       | DECIMAL(10,2) | Price per share in the trade.               |
+| buy_sell    | VARCHAR(4)    | Indicates whether it's a buy or sell trade.|
+| trader_id   | INT           | Identifier of the trader submitting the trade.|
+| status      | VARCHAR(20)   | Current status of the trade (e.g., pending, completed, canceled).|
+
+### Wallet Table:
+
+| Field       | Type          | Description                                 |
+|-------------|---------------|---------------------------------------------|
+| trader_id   | INT (PK)      | Unique identifier for each trader.          |
+| balance     | DECIMAL(10,2) | Current balance in the trader's wallet.     |
+
+### Share Table:
+
+| Field       | Type          | Description                                 |
+|-------------|---------------|---------------------------------------------|
+| share_name  | VARCHAR (PK)  | Unique identifier for each share.           |
+| quantity    | INT           | Current quantity of the share available for trading.|
