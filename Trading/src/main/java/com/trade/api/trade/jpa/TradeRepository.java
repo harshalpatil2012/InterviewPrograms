@@ -14,10 +14,7 @@ public interface TradeRepository {
 
     Optional<Trade> findByTradeId(Long tradeId) throws TradeNotFoundException;
 
-
     List<Trade> findByShareNameContaining(String shareName);
-
-    List<Trade> findTradesByTraderIdAndShareNameContaining(String traderId, String shareName);
 
     boolean existsById(Long tradeId);
 }

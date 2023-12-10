@@ -43,16 +43,6 @@ public class TradeRepositoryImpl implements TradeRepository {
         trade.getTradeId();
     }
 
-    @Override
-    public List<Trade> findTradesByTraderIdAndShareNameContaining(String traderId, String shareName) {
-        TypedQuery<Trade> query = entityManager.createQuery(
-                "SELECT t FROM Trade t WHERE t.traderId = :traderId AND t.shareName LIKE :shareName",
-                Trade.class
-        );
-        query.setParameter("traderId", traderId);
-        query.setParameter("shareName", "%" + shareName + "%");
-        return query.getResultList();
-    }
 
     @Override
     public boolean existsById(Long tradeId) {

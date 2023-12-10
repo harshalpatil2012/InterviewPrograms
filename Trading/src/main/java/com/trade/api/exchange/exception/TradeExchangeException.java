@@ -1,4 +1,4 @@
-package com.trade.api.exchange.service;
+package com.trade.api.exchange.exception;
 
 public class TradeExchangeException extends RuntimeException {
     public TradeExchangeException(String message) {

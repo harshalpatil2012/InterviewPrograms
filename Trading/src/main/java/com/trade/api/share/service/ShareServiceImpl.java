@@ -68,8 +68,7 @@ public class ShareServiceImpl implements ShareService {
         // Block the amount in the wallet
         walletService.updateBalance(traderId, balance - amount);
 
-        // Note: Depending on your architecture, you might want to
-        // implement additional logic, such as updating a dedicated
+        // Note: We may want to implement additional logic, such as updating a dedicated
         // table to track blocked amounts for pending buy trades.
     }
 }

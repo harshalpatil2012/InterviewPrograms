@@ -10,8 +10,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 @EnableScheduling
 public class MonitoringServiceApplication {
 
-    private static final String PROMETHEUS_GATEWAY_URL = "http://prometheus-gateway-url:9091";
-
     private final Counter requests = Counter.build()
             .name("requests_total")
             .help("Total number of requests.")
